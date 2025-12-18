@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Multimodal AI Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>🎙️ Multimodal AI Assistant</h1>
+    <p>Click the button and ask your question using voice</p>
+
+    <button id="askBtn">Ask Anything</button>
+
+    <div id="status"></div>
+
+    <div class="box">
+        <h3>You said:</h3>
+        <p id="question"></p>
+    </div>
+
+    <div class="box">
+        <h3>AI Response:</h3>
+        <p id="answer"></p>
+    </div>
+
+    <audio id="audio" controls></audio>
+</div>
+
+<script>
+
+    const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        alert("Your browser does not support Speech Recognition. Use Chrome or Edge.");
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    const askBtn = document.getElementById("askBtn");
+    const status = document.getElementById("status");
+    const questionEl = document.getElementById("question");
+    const answerEl = document.getElementById("answer");
+    const audio = document.getElementById("audio");
+
+    askBtn.onclick = () => {
+        status.innerText = "🎧 Listening...";
+        questionEl.innerText = "";
+        answerEl.innerText = "";
+        audio.src = "";
+
+        recognition.start();
+    };
+
+    recognition.onresult = async (event) => {
+        const transcript = event.results[0][0].transcript;
+        questionEl.innerText = transcript;
+        status.innerText = "🤖 Generating response...";
+
+        
+        const response = await fetch("/ask", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ text: transcript })
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            status.innerText = "❌ " + data.message;
+            return;
+        }
+
+        answerEl.innerText = data.answer;
+        status.innerText = "✅ Response Ready";
+
+    
+        audio.src = `/audio/${data.audio_file}`;
+        audio.play();
+    };
+
+    recognition.onerror = (event) => {
+        status.innerText = "❌ Error: " + event.error;
+    };
+
+    recognition.onend = () => {
+        console.log("Speech recognition stopped");
+    };
+</script>
+
+</body>
+</html>

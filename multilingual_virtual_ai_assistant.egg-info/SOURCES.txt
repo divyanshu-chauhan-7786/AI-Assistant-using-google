@@ -1,0 +1,8 @@
+setup.py
+multilingual_virtual_ai_assistant.egg-info/PKG-INFO
+multilingual_virtual_ai_assistant.egg-info/SOURCES.txt
+multilingual_virtual_ai_assistant.egg-info/dependency_links.txt
+multilingual_virtual_ai_assistant.egg-info/requires.txt
+multilingual_virtual_ai_assistant.egg-info/top_level.txt
+src/__init__.py
+src/helper.py
